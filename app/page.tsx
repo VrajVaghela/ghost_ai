@@ -1,26 +1,12 @@
-"use client"
+import { auth } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 
-import { useState } from "react"
+export default async function Home() {
+  const { userId } = await auth()
 
-import { EditorNavbar } from "@/components/editor/editor-navbar"
-import { ProjectSidebar } from "@/components/editor/project-sidebar"
-
-export default function Home() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-
-  return (
-    <div className="min-h-screen bg-bg-base">
-      <EditorNavbar
-        isSidebarOpen={isSidebarOpen}
-        onSidebarToggle={() => setIsSidebarOpen((prev) => !prev)}
-      />
-      <ProjectSidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
-      <main className="flex min-h-screen items-center justify-center pt-12 text-text-muted">
-        editor canvas
-      </main>
-    </div>
-  )
+  if (userId) {
+    redirect("/editor")
+  } else {
+    redirect("/sign-in")
+  }
 }
