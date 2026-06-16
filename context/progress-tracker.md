@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 02: Editor Chrome — Complete
+- Feature 03: Auth — Complete
 
 ## Current Goal
 
@@ -13,15 +13,16 @@ Update this file whenever the current phase, active feature, or implementation s
 ## Completed
 
 - `01-design-system`: shadcn/ui installed and configured, all 7 UI primitives added (Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea), `lib/utils.ts` with `cn()` created, `globals.css` dark theme tokens wired.
-- `02-editor-chrome`: `EditorNavbar` and `ProjectSidebar` shell components created. Navbar is fixed-height with sidebar toggle (PanelLeftOpen/PanelLeftClose). Sidebar floats above canvas, slides in from left, has Projects header + close button, My Projects / Shared tabs with empty states, and full-width New Project button. `app/page.tsx` wired to demo the chrome. Dialog color tokens already in place from Feature 01.
+- `02-editor-chrome`: `EditorNavbar` and `ProjectSidebar` shell components created. Navbar is fixed-height with sidebar toggle (PanelLeftOpen/PanelLeftClose). Sidebar floats above canvas, slides in from left, has Projects header + close button, My Projects / Shared tabs with empty states, and full-width New Project button. `app/editor/page.tsx` wired to demo the chrome. Dialog color tokens already in place from Feature 01.
+- `03-auth`: `@clerk/ui` installed. `ClerkProvider` wraps `<body>` in root layout with `dark` theme and CSS variable overrides. `proxy.ts` at root uses `clerkMiddleware` + `createRouteMatcher` to protect all routes except `/sign-in` and `/sign-up`. Sign-in and sign-up pages at `app/sign-in/[[...sign-in]]/` and `app/sign-up/[[...sign-up]]/` — two-panel layout on large screens (logo/tagline/feature list left, Clerk form right), form-only on small screens. `app/page.tsx` is a server component that redirects authenticated users to `/editor` and unauthenticated users to `/sign-in`. `UserButton` added to editor navbar right section. `npm run build` passes.
 
 ## In Progress
 
-- None yet.
+- None.
 
 ## Next Up
 
-- Add the next planned feature unit here.
+- Feature 04 (TBD)
 
 ## Open Questions
 
