@@ -42,3 +42,5 @@ next-env.d.ts
 
 # private context files
 /context
+
+/app/generated/prisma
