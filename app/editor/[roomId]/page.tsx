@@ -29,6 +29,7 @@ export default async function EditorWorkspacePage({ params }: Props) {
   return (
     <EditorWorkspaceClient
       project={project}
+      isOwner={project.ownerId === userId}
       ownedProjects={ownedProjects}
       sharedProjects={sharedProjects}
     />

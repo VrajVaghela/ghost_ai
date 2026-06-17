@@ -7,6 +7,8 @@ import { UserButton } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
+import { ShareDialog } from "@/components/editor/share-dialog"
+import { useShareDialog } from "@/hooks/use-share-dialog"
 import type { ProjectSummary } from "@/lib/data/projects"
 
 interface Project {
@@ -16,17 +18,20 @@ interface Project {
 
 interface EditorWorkspaceClientProps {
   project: Project
+  isOwner: boolean
   ownedProjects: ProjectSummary[]
   sharedProjects: ProjectSummary[]
 }
 
 export function EditorWorkspaceClient({
   project,
+  isOwner,
   ownedProjects,
   sharedProjects,
 }: EditorWorkspaceClientProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isAISidebarOpen, setIsAISidebarOpen] = useState(false)
+  const share = useShareDialog(project.id)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-bg-base">
@@ -51,7 +56,12 @@ export function EditorWorkspaceClient({
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2" disabled>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={share.openDialog}
+          >
             <Share2 className="h-4 w-4" />
             Share
           </Button>
@@ -97,6 +107,21 @@ export function EditorWorkspaceClient({
           <p className="select-none text-sm text-text-muted">AI chat coming soon</p>
         </aside>
       )}
+
+      <ShareDialog
+        open={share.open}
+        onClose={share.closeDialog}
+        isOwner={isOwner}
+        collaborators={share.collaborators}
+        loadingList={share.loadingList}
+        email={share.email}
+        onEmailChange={share.setEmail}
+        onInvite={share.invite}
+        inviting={share.inviting}
+        error={share.error}
+        onRemove={share.remove}
+        removingId={share.removingId}
+      />
     </div>
   )
 }
