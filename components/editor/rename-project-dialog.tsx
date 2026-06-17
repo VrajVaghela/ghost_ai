@@ -17,6 +17,7 @@ interface RenameProjectDialogProps {
   open: boolean
   currentName: string
   name: string
+  slug: string
   loading: boolean
   onNameChange: (name: string) => void
   onClose: () => void
@@ -27,6 +28,7 @@ export function RenameProjectDialog({
   open,
   currentName,
   name,
+  slug,
   loading,
   onNameChange,
   onClose,
@@ -41,7 +43,7 @@ export function RenameProjectDialog({
   }, [open])
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter" && name.trim()) {
+    if (e.key === "Enter" && slug) {
       onSubmit()
     }
   }
@@ -56,23 +58,32 @@ export function RenameProjectDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-foreground" htmlFor="rename-project-name">
-            New name
-          </label>
-          <Input
-            id="rename-project-name"
-            ref={inputRef}
-            value={name}
-            onChange={(e) => onNameChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground" htmlFor="rename-project-name">
+              New name
+            </label>
+            <Input
+              id="rename-project-name"
+              ref={inputRef}
+              value={name}
+              onChange={(e) => onNameChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+          {name && (
+            <p className={`text-xs ${slug ? "text-muted-foreground" : "text-destructive"}`}>
+              {slug
+                ? <>Slug: <span className="font-mono">{slug}</span></>
+                : "Name must contain at least one letter or number."}
+            </p>
+          )}
         </div>
 
         <DialogFooter showCloseButton>
           <Button
             variant="default"
-            disabled={!name.trim() || loading}
+            disabled={!slug || loading}
             onClick={onSubmit}
           >
             {loading ? "Saving…" : "Save"}

@@ -54,8 +54,10 @@ export function CreateProjectDialog({
             />
           </div>
           {name && (
-            <p className="text-xs text-muted-foreground">
-              Slug: <span className="font-mono">{slug || "—"}</span>
+            <p className={`text-xs ${slug ? "text-muted-foreground" : "text-destructive"}`}>
+              {slug
+                ? <>Slug: <span className="font-mono">{slug}</span></>
+                : "Name must contain at least one letter or number."}
             </p>
           )}
         </div>
@@ -63,7 +65,7 @@ export function CreateProjectDialog({
         <DialogFooter showCloseButton>
           <Button
             variant="default"
-            disabled={!name.trim() || loading}
+            disabled={!slug || loading}
             onClick={onSubmit}
           >
             {loading ? "Creating…" : "Create project"}
