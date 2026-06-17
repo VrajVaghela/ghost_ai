@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Pencil, Plus, Trash2, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -17,6 +18,7 @@ interface ProjectSidebarProps {
   onClose: () => void
   ownedProjects: ProjectSummary[]
   sharedProjects: ProjectSummary[]
+  activeProjectId?: string
   onCreateProject: () => void
   onRenameProject: (project: ProjectSummary) => void
   onDeleteProject: (project: ProjectSummary) => void
@@ -27,6 +29,7 @@ export function ProjectSidebar({
   onClose,
   ownedProjects,
   sharedProjects,
+  activeProjectId,
   onCreateProject,
   onRenameProject,
   onDeleteProject,
@@ -79,6 +82,7 @@ export function ProjectSidebar({
                     <ProjectItem
                       key={project.id}
                       project={project}
+                      isActive={project.id === activeProjectId}
                       onRename={() => onRenameProject(project)}
                       onDelete={() => onDeleteProject(project)}
                     />
@@ -95,7 +99,11 @@ export function ProjectSidebar({
               ) : (
                 <ul className="mt-2 flex flex-col gap-0.5 overflow-y-auto">
                   {sharedProjects.map((project) => (
-                    <ProjectItem key={project.id} project={project} />
+                    <ProjectItem
+                      key={project.id}
+                      project={project}
+                      isActive={project.id === activeProjectId}
+                    />
                   ))}
                 </ul>
               )}
@@ -116,16 +124,25 @@ export function ProjectSidebar({
 
 interface ProjectItemProps {
   project: ProjectSummary
+  isActive?: boolean
   onRename?: () => void
   onDelete?: () => void
 }
 
-function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
+function ProjectItem({ project, isActive, onRename, onDelete }: ProjectItemProps) {
   const hasActions = !!onRename && !!onDelete
 
   return (
-    <li className="group flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-bg-subtle">
-      <span className="truncate text-sm text-text-primary">{project.name}</span>
+    <li className={cn(
+      "group flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-bg-subtle",
+      isActive && "bg-bg-subtle"
+    )}>
+      <Link
+        href={`/editor/${project.id}`}
+        className="min-w-0 flex-1 truncate text-sm text-text-primary"
+      >
+        {project.name}
+      </Link>
       {hasActions && (
         <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
           <Button
