@@ -3,7 +3,6 @@
 import { Pencil, Plus, Trash2, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { mockProjects, type Project } from "@/lib/mock-projects"
 import { Button } from "@/components/ui/button"
 import {
   Tabs,
@@ -11,25 +10,27 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import type { ProjectSummary } from "@/lib/data/projects"
 
 interface ProjectSidebarProps {
   isOpen: boolean
   onClose: () => void
+  ownedProjects: ProjectSummary[]
+  sharedProjects: ProjectSummary[]
   onCreateProject: () => void
-  onRenameProject: (project: Project) => void
-  onDeleteProject: (project: Project) => void
+  onRenameProject: (project: ProjectSummary) => void
+  onDeleteProject: (project: ProjectSummary) => void
 }
 
 export function ProjectSidebar({
   isOpen,
   onClose,
+  ownedProjects,
+  sharedProjects,
   onCreateProject,
   onRenameProject,
   onDeleteProject,
 }: ProjectSidebarProps) {
-  const myProjects = mockProjects.filter((p) => p.owned)
-  const sharedProjects = mockProjects.filter((p) => !p.owned)
-
   return (
     <>
       {/* Mobile backdrop */}
@@ -68,13 +69,13 @@ export function ProjectSidebar({
             </TabsList>
 
             <TabsContent value="my-projects" className="flex flex-1 flex-col overflow-hidden">
-              {myProjects.length === 0 ? (
+              {ownedProjects.length === 0 ? (
                 <div className="flex flex-1 items-center justify-center">
                   <p className="text-sm text-text-muted">No projects yet</p>
                 </div>
               ) : (
                 <ul className="mt-2 flex flex-col gap-0.5 overflow-y-auto">
-                  {myProjects.map((project) => (
+                  {ownedProjects.map((project) => (
                     <ProjectItem
                       key={project.id}
                       project={project}
@@ -114,7 +115,7 @@ export function ProjectSidebar({
 }
 
 interface ProjectItemProps {
-  project: Project
+  project: ProjectSummary
   onRename?: () => void
   onDelete?: () => void
 }

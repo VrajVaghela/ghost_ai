@@ -20,9 +20,10 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}));
   const name: string = body.name?.trim() || "Untitled Project";
+  const id: string | undefined = body.id?.trim() || undefined;
 
   const project = await prisma.project.create({
-    data: { ownerId: userId, name },
+    data: { ...(id ? { id } : {}), ownerId: userId, name },
   });
 
   return NextResponse.json(project, { status: 201 });
