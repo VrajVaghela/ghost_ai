@@ -69,6 +69,7 @@ export default function EditorPage() {
         open={dialog.type === "rename"}
         currentName={dialog.project?.name ?? ""}
         name={form.name}
+        slug={form.slug}
         loading={loading}
         onNameChange={handleNameChange}
         onClose={closeDialog}
