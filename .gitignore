@@ -42,3 +42,5 @@ next-env.d.ts
 
 # private context files
 /context
+/AGENTS.md
+/CLAUDE.md
