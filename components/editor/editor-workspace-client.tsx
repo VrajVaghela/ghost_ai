@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2 } from "lucide-react"
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2, LayoutGrid } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 
 import { cn } from "@/lib/utils"
@@ -57,6 +57,15 @@ export function EditorWorkspaceClient({
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => window.dispatchEvent(new CustomEvent("open-starter-templates"))}
+          >
+            <LayoutGrid className="h-4 w-4" />
+            Templates
+          </Button>
           <Button
             variant="outline"
             size="sm"

@@ -1,17 +1,27 @@
 "use client"
 
-import React, { useCallback, useRef } from "react"
+import React, { useCallback, useRef, useState, useEffect } from "react"
 import { ReactFlow, MiniMap, Background, BackgroundVariant, ConnectionMode, useReactFlow } from "@xyflow/react"
 import { useLiveblocksFlow } from "@liveblocks/react-flow"
+import { useUndo, useRedo, useCanUndo, useCanRedo } from "@liveblocks/react"
 import { CanvasNode } from "./canvas-node"
+import { CanvasEdge } from "./canvas-edge"
 import { ShapeToolbar } from "./shape-toolbar"
+import { CanvasControlBar } from "./canvas-control-bar"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { getDefaultColorForShape } from "@/types/canvas"
+import { StarterTemplatesModal } from "../starter-templates-modal"
+import { type CanvasTemplate } from "../starter-templates"
 import "@xyflow/react/dist/style.css"
 import "@liveblocks/react-ui/styles.css"
 import "@liveblocks/react-flow/styles.css"
 
 const nodeTypes = {
   canvasNode: CanvasNode,
+}
+
+const edgeTypes = {
+  canvasEdge: CanvasEdge,
 }
 
 export function CanvasFlow() {
@@ -22,8 +32,49 @@ export function CanvasFlow() {
       edges: { initial: [] },
     })
 
-  const { screenToFlowPosition } = useReactFlow()
+  const reactFlow = useReactFlow()
+  const { screenToFlowPosition } = reactFlow
   const counterRef = useRef(0)
+
+  const undo = useUndo()
+  const redo = useRedo()
+  const canUndo = useCanUndo()
+  const canRedo = useCanRedo()
+
+  // Register keyboard shortcuts hook
+  useKeyboardShortcuts(reactFlow, undo, redo)
+
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false)
+
+  useEffect(() => {
+    const handleOpen = () => setIsTemplatesModalOpen(true)
+    window.addEventListener("open-starter-templates", handleOpen)
+    return () => window.removeEventListener("open-starter-templates", handleOpen)
+  }, [])
+
+  const handleImportTemplate = useCallback(
+    (template: CanvasTemplate) => {
+      reactFlow.setNodes(template.nodes)
+      reactFlow.setEdges(template.edges)
+      setIsTemplatesModalOpen(false)
+      setTimeout(() => {
+        reactFlow.fitView({ duration: 200 })
+      }, 50)
+    },
+    [reactFlow]
+  )
+
+  const handleZoomIn = useCallback(() => {
+    reactFlow.zoomIn({ duration: 150 })
+  }, [reactFlow])
+
+  const handleZoomOut = useCallback(() => {
+    reactFlow.zoomOut({ duration: 150 })
+  }, [reactFlow])
+
+  const handleFitView = useCallback(() => {
+    reactFlow.fitView({ duration: 150 })
+  }, [reactFlow])
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault()
@@ -85,6 +136,45 @@ export function CanvasFlow() {
       onDragOver={onDragOver} 
       onDrop={onDrop}
     >
+      {/* Global SVG definitions for custom edge arrowheads */}
+      <svg style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}>
+        <defs>
+          <marker
+            id="arrow-rest"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#505060" />
+          </marker>
+          <marker
+            id="arrow-hover"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#c0c0cc" />
+          </marker>
+          <marker
+            id="arrow-selected"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+          </marker>
+        </defs>
+      </svg>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -93,6 +183,10 @@ export function CanvasFlow() {
         onConnect={onConnect}
         onDelete={onDelete}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        defaultEdgeOptions={{
+          type: "canvasEdge",
+        }}
         connectionMode={ConnectionMode.Loose}
         fitView
       >
@@ -107,6 +201,23 @@ export function CanvasFlow() {
 
       {/* Floating pill-shaped toolbar */}
       <ShapeToolbar />
+
+      {/* Canvas Control Bar */}
+      <CanvasControlBar
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onFitView={handleFitView}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={canUndo}
+        canRedo={canRedo}
+      />
+
+      <StarterTemplatesModal
+        open={isTemplatesModalOpen}
+        onClose={() => setIsTemplatesModalOpen(false)}
+        onImport={handleImportTemplate}
+      />
     </div>
   )
 }

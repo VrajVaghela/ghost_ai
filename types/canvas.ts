@@ -1,11 +1,28 @@
 export type NodeData = {
   label: string
   color?: string
+  textColor?: string
   shape?: string
 }
 
 export type CanvasNodeType = "canvasNode"
 export type CanvasEdgeType = "canvasEdge"
+
+export type NodeColorPair = {
+  bg: string
+  text: string
+}
+
+export const NODE_COLORS: NodeColorPair[] = [
+  { bg: "#1F1F1F", text: "#EDEDED" }, // Neutral dark (default)
+  { bg: "#10233D", text: "#52A8FF" }, // Blue
+  { bg: "#2E1938", text: "#BF7AF0" }, // Purple
+  { bg: "#331B00", text: "#FF990A" }, // Orange
+  { bg: "#3C1618", text: "#FF6166" }, // Red
+  { bg: "#3A1726", text: "#F75F8F" }, // Pink
+  { bg: "#0F2E18", text: "#62C073" }, // Green
+  { bg: "#062822", text: "#0AC7B4" }, // Teal
+]
 
 export const SHAPE_PALETTES: Record<string, { bg: string; border: string }> = {
   rectangle: { bg: "rgba(30, 27, 75, 0.85)", border: "#6366f1" }, // Indigo
