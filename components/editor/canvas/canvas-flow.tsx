@@ -3,11 +3,13 @@
 import React, { useCallback, useRef, useState, useEffect } from "react"
 import { ReactFlow, MiniMap, Background, BackgroundVariant, ConnectionMode, useReactFlow } from "@xyflow/react"
 import { useLiveblocksFlow } from "@liveblocks/react-flow"
-import { useUndo, useRedo, useCanUndo, useCanRedo } from "@liveblocks/react"
+import { useUndo, useRedo, useCanUndo, useCanRedo, useUpdateMyPresence } from "@liveblocks/react"
 import { CanvasNode } from "./canvas-node"
 import { CanvasEdge } from "./canvas-edge"
 import { ShapeToolbar } from "./shape-toolbar"
 import { CanvasControlBar } from "./canvas-control-bar"
+import { CollaboratorCursors } from "./collaborator-cursors"
+import { PresenceAvatars } from "./presence-avatars"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { getDefaultColorForShape } from "@/types/canvas"
 import { StarterTemplatesModal } from "../starter-templates-modal"
@@ -40,9 +42,25 @@ export function CanvasFlow() {
   const redo = useRedo()
   const canUndo = useCanUndo()
   const canRedo = useCanRedo()
+  const updateMyPresence = useUpdateMyPresence()
 
   // Register keyboard shortcuts hook
   useKeyboardShortcuts(reactFlow, undo, redo)
+
+  const onMouseMove = useCallback(
+    (event: React.MouseEvent) => {
+      const position = reactFlow.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      })
+      updateMyPresence({ cursor: position })
+    },
+    [reactFlow, updateMyPresence]
+  )
+
+  const onMouseLeave = useCallback(() => {
+    updateMyPresence({ cursor: null })
+  }, [updateMyPresence])
 
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false)
 
@@ -188,6 +206,8 @@ export function CanvasFlow() {
           type: "canvasEdge",
         }}
         connectionMode={ConnectionMode.Loose}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
         fitView
       >
         <MiniMap
@@ -197,6 +217,7 @@ export function CanvasFlow() {
           style={{ backgroundColor: "#111114", border: "1px solid #2a2a30" }}
         />
         <Background variant={BackgroundVariant.Dots} color="#2a2a30" gap={20} size={1} />
+        <CollaboratorCursors />
       </ReactFlow>
 
       {/* Floating pill-shaped toolbar */}
@@ -212,6 +233,9 @@ export function CanvasFlow() {
         canUndo={canUndo}
         canRedo={canRedo}
       />
+
+      {/* Presence Avatars overlay */}
+      <PresenceAvatars />
 
       <StarterTemplatesModal
         open={isTemplatesModalOpen}

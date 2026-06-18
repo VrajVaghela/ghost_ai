@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2, LayoutGrid } from "lucide-react"
-import { UserButton } from "@clerk/nextjs"
-
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
@@ -86,7 +84,6 @@ export function EditorWorkspaceClient({
               <PanelRightOpen className="h-5 w-5" />
             )}
           </Button>
-          <UserButton />
         </div>
       </header>
 
