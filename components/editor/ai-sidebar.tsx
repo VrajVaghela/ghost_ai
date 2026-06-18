@@ -1,56 +1,196 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Bot, X, Send, Sparkles, FileText, Download } from "lucide-react"
+import { Bot, X, Send, Sparkles, FileText, Download, Loader2 } from "lucide-react"
+import { useRealtimeRun } from "@trigger.dev/react-hooks"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useStorage, useOthers, useMutation, useSelf } from "@liveblocks/react"
+import { LiveList, LiveObject } from "@liveblocks/client"
+import type { designAgentTask } from "@/trigger/design-agent"
+import {
+  AiStatusMessageSchema,
+  AiChatMessageSchema,
+  type AiStatusMessage,
+  type AiChatMessage,
+} from "@/types/tasks"
 
 interface AISidebarProps {
   isOpen: boolean
   onClose: () => void
+  projectId: string
 }
 
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-}
-
-export function AISidebar({ isOpen, onClose }: AISidebarProps) {
-  const [messages, setMessages] = useState<Message[]>([])
+export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
   const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [runId, setRunId] = useState<string | null>(null)
+  const [publicToken, setPublicToken] = useState<string | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+
+  // Current user identity for labelling chat messages
+  const self = useSelf()
+  const senderName = self?.info?.name ?? self?.id ?? "You"
+
+  // Liveblocks presence and storage queries
+  const others = useOthers()
+  const aiCollaborator = others.find((other) => other.id === "ai-agent")
+  const isAiThinking = aiCollaborator?.presence?.thinking ?? false
+  const aiStatus = aiCollaborator?.presence?.status ?? ""
+
+  const rawStatusFeed = useStorage((root) => root["ai-status-feed"])
+  const rawChatFeed = useStorage((root) => root["ai-chat"])
+
+  // Validate status feed — most recent valid entry
+  let latestStatusMessage: AiStatusMessage | null = null
+  if (rawStatusFeed && rawStatusFeed.length > 0) {
+    for (let i = rawStatusFeed.length - 1; i >= 0; i--) {
+      const parsed = AiStatusMessageSchema.safeParse(rawStatusFeed[i])
+      if (parsed.success) {
+        latestStatusMessage = parsed.data
+        break
+      }
+    }
+  }
+
+  // Validate and collect all chat messages in order
+  const messages: AiChatMessage[] = []
+  if (rawChatFeed) {
+    for (let i = 0; i < rawChatFeed.length; i++) {
+      const parsed = AiChatMessageSchema.safeParse(rawChatFeed[i])
+      if (parsed.success) {
+        messages.push(parsed.data)
+      }
+    }
+  }
+
+  // Mutation: append a message to the ai-chat feed
+  const appendChatMessage = useMutation(
+    ({ storage }, msg: AiChatMessage) => {
+      let feed = storage.get("ai-chat")
+      if (!feed) {
+        storage.set("ai-chat", new LiveList([]))
+        feed = storage.get("ai-chat")!
+      }
+      feed.push(
+        new LiveObject({
+          id: msg.id,
+          sender: msg.sender,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.timestamp,
+        })
+      )
+    },
+    []
+  )
+
+  // Track the triggered AI design run in real time. The hook stays inert until
+  // a runId + publicToken are available (enabled toggles the subscription).
+  const { run: realtimeRun } = useRealtimeRun<typeof designAgentTask>(runId ?? "", {
+    accessToken: publicToken ?? "",
+    enabled: Boolean(runId && publicToken),
+    onComplete: (completedRun, error) => {
+      const now = Date.now()
+      const failed =
+        Boolean(error) ||
+        completedRun?.status === "FAILED" ||
+        completedRun?.status === "CRASHED" ||
+        completedRun?.status === "CANCELED" ||
+        completedRun?.status === "TIMED_OUT"
+
+      appendChatMessage({
+        id: `msg-${now}-assistant`,
+        sender: "Ghost AI",
+        role: "assistant",
+        content: failed
+          ? `An error occurred during design generation: ${
+              error?.message ?? "the design run did not complete successfully."
+            }`
+          : "I have successfully generated the architecture nodes and connections on the canvas. Let me know if you would like me to make any modifications!",
+        timestamp: now,
+      })
+
+      // Reset loading + run state once the run reaches a terminal state.
+      setRunId(null)
+      setPublicToken(null)
+      setIsLoading(false)
+    },
+  })
+
+  // A run is active from the moment it is triggered until it reaches a
+  // terminal state (at which point runId is cleared in onComplete).
+  const isRunActive = Boolean(runId)
+
+  // Input/controls are busy while submitting, while our own run is active, or
+  // while any collaborator's AI run is thinking (driven by shared presence).
+  const isBusy = isLoading || isRunActive || isAiThinking
 
   // Scroll to bottom on new messages
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [messages.length])
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = (textToSend ?? input).trim()
-    if (!text) return
+    if (!text || isBusy) return
 
-    const userMessage: Message = {
-      id: `msg-${Date.now()}-user`,
+    const now = Date.now()
+
+    // 1. Push the user's message to the collaborative ai-chat feed.
+    appendChatMessage({
+      id: `msg-${now}-user`,
+      sender: senderName,
       role: "user",
       content: text,
-    }
+      timestamp: now,
+    })
 
-    setMessages((prev) => [...prev, userMessage])
     if (!textToSend) setInput("")
+    setIsLoading(true)
 
-    // Simulated response for interactive magic
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: `msg-${Date.now()}-assistant`,
-        role: "assistant",
-        content: `I received your architecture query: "${text}". I am analyzing the design patterns and edge behaviors. Let me know if you would like me to compile this into a Spec file.`,
+    try {
+      // 2. Trigger the design agent and read back the run handle + token.
+      const res = await fetch("/api/ai/design", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: text,
+          roomId: projectId,
+          projectId: projectId,
+        }),
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || "Failed to trigger AI design agent")
       }
-      setMessages((prev) => [...prev, assistantMessage])
-    }, 800)
+
+      const data = (await res.json()) as { runId?: string; publicToken?: string }
+      if (!data.runId || !data.publicToken) {
+        throw new Error("Design agent did not return a run handle.")
+      }
+
+      // 3. Store the run handle — useRealtimeRun takes over from here, and
+      //    onComplete resets loading state when the run finishes.
+      setRunId(data.runId)
+      setPublicToken(data.publicToken)
+    } catch (err) {
+      // Surface errors as a message in the ai-chat feed.
+      const message =
+        err instanceof Error ? err.message : "Failed to start design agent."
+      appendChatMessage({
+        id: `msg-${Date.now()}-assistant`,
+        sender: "Ghost AI",
+        role: "assistant",
+        content: `An error occurred while starting the design agent: ${message}`,
+        timestamp: Date.now(),
+      })
+      setIsLoading(false)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -128,7 +268,8 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                     <button
                       key={i}
                       onClick={() => handleSend(chip)}
-                      className="text-left w-full rounded-full bg-subtle hover:bg-subtle/80 border border-surface-border/50 px-3.5 py-2 text-xs font-medium text-accent-text transition-colors"
+                      disabled={isBusy}
+                      className="text-left w-full rounded-full bg-subtle hover:bg-subtle/80 border border-surface-border/50 px-3.5 py-2 text-xs font-medium text-accent-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {chip}
                     </button>
@@ -136,22 +277,32 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                 </div>
               </div>
             ) : (
-              /* Chat Area */
+              /* Chat Area — rendered from the collaborative ai-chat feed */
               <div className="flex flex-col gap-3 pb-4">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
                     className={cn(
-                      "flex w-full",
-                      msg.role === "user" ? "justify-end" : "justify-start"
+                      "flex w-full flex-col gap-0.5",
+                      msg.role === "user" ? "items-end" : "items-start"
                     )}
                   >
+                    <div className="flex items-center gap-1.5 px-1">
+                      <span className="text-[10px] text-muted-text font-medium">{msg.sender}</span>
+                      <span className="text-[9px] text-muted-text/60">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })}
+                      </span>
+                    </div>
                     <div
                       className={cn(
                         "max-w-[85%] rounded-2xl px-3 py-2 text-xs leading-normal whitespace-pre-wrap shadow-sm",
                         msg.role === "user"
-                          ? "bg-brand-dim border-brand/50 border-2 text-copy-primary"
-                          : "bg-elevated border border-surface-border text-accent-text"
+                          ? "bg-[#62C073] text-[#08210f] font-medium"
+                          : "bg-elevated border border-surface-border text-copy-primary"
                       )}
                     >
                       {msg.content}
@@ -163,6 +314,24 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
             )}
           </ScrollArea>
 
+          {/* Compact status strip — only visible while a run is active */}
+          {isBusy && (
+            <div className="mx-3 mb-2 flex items-center gap-2 rounded-xl border border-[#62C073]/30 bg-surface/90 px-3 py-2 backdrop-blur-md">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#62C073] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#62C073]" />
+              </span>
+              <span className="truncate text-[11px] font-medium text-[#62C073]">
+                {latestStatusMessage?.text ||
+                  latestStatusMessage?.message ||
+                  aiStatus ||
+                  (realtimeRun?.status === "QUEUED"
+                    ? "Ghost AI is queued..."
+                    : "Ghost AI is working...")}
+              </span>
+            </div>
+          )}
+
           {/* Chat Input Box */}
           <div className="p-3 border-t border-surface-border bg-base/50 relative flex items-end gap-2">
             <div className="relative flex-1">
@@ -170,17 +339,22 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask Ghost AI..."
-                className="min-h-[72px] max-h-[160px] pr-10 py-2 resize-none overflow-y-auto w-full bg-subtle/50 border-surface-border"
+                placeholder={isBusy ? "Ghost AI is drawing..." : "Ask Ghost AI..."}
+                disabled={isBusy}
+                className="min-h-[72px] max-h-[160px] pr-10 py-2 resize-none overflow-y-auto w-full bg-subtle/50 border-surface-border disabled:opacity-50"
                 style={{ height: "72px" }}
               />
               <Button
                 size="icon-xs"
-                className="absolute right-2.5 bottom-2.5 bg-accent hover:bg-accent/80 text-white shadow-sm"
+                className="absolute right-2.5 bottom-2.5 bg-[#62C073] hover:bg-[#62C073]/90 text-[#08210f] shadow-sm disabled:opacity-40"
                 onClick={() => handleSend()}
-                disabled={!input.trim()}
+                disabled={!input.trim() || isBusy}
               >
-                <Send className="h-3.5 w-3.5" />
+                {isBusy ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" />
+                )}
               </Button>
             </div>
           </div>

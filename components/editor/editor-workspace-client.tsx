@@ -12,6 +12,7 @@ import { DeleteProjectDialog } from "@/components/editor/delete-project-dialog"
 import { ShareDialog } from "@/components/editor/share-dialog"
 import { useShareDialog } from "@/hooks/use-share-dialog"
 import { useProjectActions } from "@/hooks/use-project-actions"
+import { LiveblocksProvider, RoomProvider } from "@liveblocks/react"
 import { CanvasWrapper } from "@/components/editor/canvas/canvas-wrapper"
 import type { ProjectSummary } from "@/lib/data/projects"
 
@@ -57,7 +58,12 @@ export function EditorWorkspaceClient({
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-bg-base">
+    <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
+      <RoomProvider
+        id={project.id}
+        initialPresence={{ cursor: null, thinking: false }}
+      >
+        <div className="flex h-screen flex-col overflow-hidden bg-bg-base">
       <header className="fixed left-0 right-0 top-0 z-50 flex h-12 items-center border-b border-border-default bg-bg-surface px-3">
         <div className="flex items-center gap-2">
           <Button
@@ -153,12 +159,13 @@ export function EditorWorkspaceClient({
           isAISidebarOpen && "mr-80"
         )}
       >
-        <CanvasWrapper roomId={project.id} />
+        <CanvasWrapper />
       </main>
 
       <AISidebar
         isOpen={isAISidebarOpen}
         onClose={() => setIsAISidebarOpen(false)}
+        projectId={project.id}
       />
 
       <ShareDialog
@@ -209,5 +216,7 @@ export function EditorWorkspaceClient({
         onSubmit={actions.submitDelete}
       />
     </div>
+      </RoomProvider>
+    </LiveblocksProvider>
   )
 }

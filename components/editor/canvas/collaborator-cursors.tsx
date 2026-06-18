@@ -4,6 +4,7 @@ import React from "react"
 import { useOthers } from "@liveblocks/react"
 import { useReactFlow, useViewport } from "@xyflow/react"
 import { useUser } from "@clerk/nextjs"
+import { Loader2 } from "lucide-react"
 
 export function CollaboratorCursors() {
   const others = useOthers()
@@ -77,9 +78,12 @@ export function CollaboratorCursors() {
               />
             </svg>
             <div
-              className="absolute left-4 top-4 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-white shadow-md select-none whitespace-nowrap"
+              className="absolute left-4 top-4 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-white shadow-md select-none whitespace-nowrap flex items-center gap-1"
               style={{ backgroundColor: color }}
             >
+              {other.presence?.thinking && (
+                <Loader2 className="h-2.5 w-2.5 animate-spin text-white" />
+              )}
               {name}
             </div>
           </div>
