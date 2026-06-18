@@ -2,6 +2,7 @@
 
 import React from "react"
 import { LiveblocksProvider, RoomProvider, ClientSideSuspense } from "@liveblocks/react"
+import { ReactFlowProvider } from "@xyflow/react"
 import { CanvasFlow } from "./canvas-flow"
 
 interface CanvasWrapperProps {
@@ -17,7 +18,9 @@ export function CanvasWrapper({ roomId }: CanvasWrapperProps) {
       >
         <CanvasErrorBoundary>
           <ClientSideSuspense fallback={<CanvasLoading />}>
-            <CanvasFlow />
+            <ReactFlowProvider>
+              <CanvasFlow />
+            </ReactFlowProvider>
           </ClientSideSuspense>
         </CanvasErrorBoundary>
       </RoomProvider>
