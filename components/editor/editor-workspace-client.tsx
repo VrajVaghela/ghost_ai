@@ -5,6 +5,7 @@ import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2,
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
+import { AISidebar } from "@/components/editor/ai-sidebar"
 import { CreateProjectDialog } from "@/components/editor/create-project-dialog"
 import { RenameProjectDialog } from "@/components/editor/rename-project-dialog"
 import { DeleteProjectDialog } from "@/components/editor/delete-project-dialog"
@@ -114,11 +115,10 @@ export function EditorWorkspaceClient({
         <CanvasWrapper roomId={project.id} />
       </main>
 
-      {isAISidebarOpen && (
-        <aside className="fixed right-0 top-12 z-40 flex h-[calc(100vh-3rem)] w-80 items-center justify-center border-l border-border-default bg-bg-elevated">
-          <p className="select-none text-sm text-text-muted">AI chat coming soon</p>
-        </aside>
-      )}
+      <AISidebar
+        isOpen={isAISidebarOpen}
+        onClose={() => setIsAISidebarOpen(false)}
+      />
 
       <ShareDialog
         open={share.open}
