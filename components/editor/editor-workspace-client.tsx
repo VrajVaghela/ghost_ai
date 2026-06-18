@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2, LayoutGrid } from "lucide-react"
+import { useState, useEffect } from "react"
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2, LayoutGrid, Save, Loader2, Check, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
@@ -38,6 +38,24 @@ export function EditorWorkspaceClient({
   const share = useShareDialog(project.id)
   const actions = useProjectActions()
 
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
+
+  useEffect(() => {
+    const handleStatusChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail && typeof detail === "object" && "status" in detail) {
+        setSaveStatus(detail.status)
+      }
+    }
+
+    window.addEventListener("canvas-save-status", handleStatusChange)
+    return () => window.removeEventListener("canvas-save-status", handleStatusChange)
+  }, [])
+
+  const handleSave = () => {
+    window.dispatchEvent(new CustomEvent("canvas-manual-save"))
+  }
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-bg-base">
       <header className="fixed left-0 right-0 top-0 z-50 flex h-12 items-center border-b border-border-default bg-bg-surface px-3">
@@ -61,6 +79,29 @@ export function EditorWorkspaceClient({
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "gap-2 min-w-[80px] transition-all duration-300",
+              saveStatus === "saved" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300",
+              saveStatus === "error" && "border-destructive/30 bg-destructive/10 text-destructive-foreground hover:bg-destructive/20"
+            )}
+            onClick={handleSave}
+            disabled={saveStatus === "saving"}
+          >
+            {saveStatus === "saving" && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
+            {saveStatus === "saved" && <Check className="h-4 w-4 text-emerald-400" />}
+            {saveStatus === "error" && <AlertCircle className="h-4 w-4 text-destructive" />}
+            {saveStatus === "idle" && <Save className="h-4 w-4 text-text-muted" />}
+            <span>
+              {saveStatus === "saving" && "Saving..."}
+              {saveStatus === "saved" && "Saved"}
+              {saveStatus === "error" && "Error"}
+              {saveStatus === "idle" && "Save"}
+            </span>
+          </Button>
+
           <Button
             variant="outline"
             size="sm"

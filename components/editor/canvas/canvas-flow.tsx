@@ -3,7 +3,7 @@
 import React, { useCallback, useRef, useState, useEffect } from "react"
 import { ReactFlow, MiniMap, Background, BackgroundVariant, ConnectionMode, useReactFlow } from "@xyflow/react"
 import { useLiveblocksFlow } from "@liveblocks/react-flow"
-import { useUndo, useRedo, useCanUndo, useCanRedo, useUpdateMyPresence } from "@liveblocks/react"
+import { useUndo, useRedo, useCanUndo, useCanRedo, useUpdateMyPresence, useRoom } from "@liveblocks/react"
 import { CanvasNode } from "./canvas-node"
 import { CanvasEdge } from "./canvas-edge"
 import { ShapeToolbar } from "./shape-toolbar"
@@ -14,6 +14,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { getDefaultColorForShape } from "@/types/canvas"
 import { StarterTemplatesModal } from "../starter-templates-modal"
 import { type CanvasTemplate } from "../starter-templates"
+import { useCanvasAutosave } from "@/hooks/use-canvas-autosave"
 import "@xyflow/react/dist/style.css"
 import "@liveblocks/react-ui/styles.css"
 import "@liveblocks/react-flow/styles.css"
@@ -43,6 +44,50 @@ export function CanvasFlow() {
   const canUndo = useCanUndo()
   const canRedo = useCanRedo()
   const updateMyPresence = useUpdateMyPresence()
+
+  const room = useRoom()
+  const projectId = room.id
+
+  // Hook handles debounced autosaving and manual saving
+  useCanvasAutosave(projectId, nodes, edges)
+
+  const [hasCheckedLoad, setHasCheckedLoad] = useState(false)
+
+  // Load saved canvas state if the room is empty
+  useEffect(() => {
+    if (hasCheckedLoad) return
+
+    const loadSavedCanvas = async () => {
+      if (nodes.length === 0 && edges.length === 0) {
+        try {
+          const res = await fetch(`/api/projects/${projectId}/canvas`)
+          if (res.ok) {
+            const data = await res.json()
+            if (data && (data.nodes || data.edges)) {
+              // Load state
+              reactFlow.setNodes(data.nodes || [])
+              reactFlow.setEdges(data.edges || [])
+              
+              // Dispatch loaded event to sync prevDataRef in the hook
+              window.dispatchEvent(
+                new CustomEvent("canvas-loaded", { detail: data })
+              )
+
+              // Wait brief moment, then fit view
+              setTimeout(() => {
+                reactFlow.fitView({ duration: 200 })
+              }, 50)
+            }
+          }
+        } catch (e) {
+          console.error("Error loading saved canvas:", e)
+        }
+      }
+      setHasCheckedLoad(true)
+    }
+
+    loadSavedCanvas()
+  }, [nodes.length, edges.length, projectId, reactFlow, hasCheckedLoad])
 
   // Register keyboard shortcuts hook
   useKeyboardShortcuts(reactFlow, undo, redo)
