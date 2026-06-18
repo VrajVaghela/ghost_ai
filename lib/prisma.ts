@@ -1,6 +1,7 @@
 import { PrismaClient } from "@/app/generated/prisma/client";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
@@ -29,7 +30,13 @@ function createPrismaClient(): PrismaClient {
     }).$extends(withAccelerate()) as unknown as PrismaClient;
   }
 
-  const adapter = new PrismaPg({ connectionString: normalizeSSLMode(url) });
+  const pool = new Pool({
+    connectionString: normalizeSSLMode(url),
+    // Release idle connections after 30s — well below Prisma Postgres's server-side
+    // idle timeout, so the pool never hands out a connection the server already closed.
+    idleTimeoutMillis: 30_000,
+  });
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
 

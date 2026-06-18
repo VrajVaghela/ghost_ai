@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
 import { ShareDialog } from "@/components/editor/share-dialog"
 import { useShareDialog } from "@/hooks/use-share-dialog"
+import { CanvasWrapper } from "@/components/editor/canvas/canvas-wrapper"
 import type { ProjectSummary } from "@/lib/data/projects"
 
 interface Project {
@@ -93,13 +94,13 @@ export function EditorWorkspaceClient({
 
       <main
         className={cn(
-          "flex flex-1 items-center justify-center bg-[#0d0d0d] pt-12",
+          "flex flex-1 bg-[#0d0d0d] pt-12",
           "transition-all duration-300",
           isSidebarOpen && "ml-72",
           isAISidebarOpen && "mr-80"
         )}
       >
-        <p className="select-none text-sm text-text-muted">Canvas placeholder</p>
+        <CanvasWrapper roomId={project.id} />
       </main>
 
       {isAISidebarOpen && (

@@ -89,6 +89,28 @@
   --radius: 0.75rem;
 }
 
+/* ── React Flow dark-theme overrides ── */
+.react-flow {
+  --xy-background-color-default: var(--bg-base);
+  --xy-background-pattern-color-default: var(--border-default);
+  --xy-node-background-color-default: var(--bg-elevated);
+  --xy-node-border-default: 1px solid var(--border-default);
+  --xy-node-color-default: var(--text-primary);
+  --xy-node-boxshadow-hover-default: 0 0 0 1px #3b82f6;
+  --xy-node-boxshadow-selected-default: 0 0 0 1.5px #3b82f6;
+  --xy-node-group-background-color-default: rgba(30, 30, 35, 0.5);
+  --xy-edge-stroke-default: var(--border-subtle);
+  --xy-edge-stroke-selected-default: #3b82f6;
+  --xy-connectionline-stroke-default: #3b82f6;
+  --xy-attribution-background-color-default: var(--bg-elevated);
+  --xy-minimap-background-color-default: var(--bg-surface);
+  --xy-minimap-mask-background-color-default: rgba(8, 8, 9, 0.7);
+  --xy-handle-background-color-default: #3b82f6;
+  --xy-handle-border-color-default: var(--bg-base);
+  --xy-selection-background-color-default: rgba(59, 130, 246, 0.05);
+  --xy-selection-border-default: 1px dotted #3b82f6;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

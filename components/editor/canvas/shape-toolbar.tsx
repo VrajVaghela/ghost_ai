@@ -1,0 +1,44 @@
+"use client"
+
+import React from "react"
+import { RectangleHorizontal, Diamond, Circle, Pill, Cylinder, Hexagon } from "lucide-react"
+
+const SHAPES = [
+  { name: "rectangle", icon: RectangleHorizontal, width: 120, height: 70, label: "Rectangle" },
+  { name: "diamond", icon: Diamond, width: 100, height: 100, label: "Diamond" },
+  { name: "circle", icon: Circle, width: 80, height: 80, label: "Circle" },
+  { name: "pill", icon: Pill, width: 120, height: 60, label: "Pill" },
+  { name: "cylinder", icon: Cylinder, width: 90, height: 80, label: "Cylinder" },
+  { name: "hexagon", icon: Hexagon, width: 90, height: 90, label: "Hexagon" },
+]
+
+export function ShapeToolbar() {
+  const onDragStart = (event: React.DragEvent, shape: string, width: number, height: number) => {
+    event.dataTransfer.setData(
+      "application/reactflow",
+      JSON.stringify({ shape, width, height })
+    )
+    event.dataTransfer.effectAllowed = "move"
+  }
+
+  return (
+    <div className="absolute bottom-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1.5 rounded-full border border-border-default/80 bg-bg-elevated/90 px-4 py-2 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-border-subtle/80 select-none">
+      {SHAPES.map(({ name, icon: Icon, width, height, label }) => (
+        <div
+          key={name}
+          draggable
+          onDragStart={(e) => onDragStart(e, name, width, height)}
+          title={`Drag ${label} to canvas`}
+          className="group relative flex h-10 w-10 cursor-grab items-center justify-center rounded-full text-text-secondary transition-all duration-200 hover:scale-110 hover:bg-bg-subtle hover:text-accent-primary active:cursor-grabbing active:scale-95"
+        >
+          <Icon className="h-5 w-5 transition-transform duration-200 group-hover:rotate-3" />
+          
+          {/* Custom micro-animated tooltip */}
+          <span className="pointer-events-none absolute -top-8 scale-90 rounded bg-bg-surface border border-border-default px-2 py-0.5 text-[10px] font-medium text-text-secondary opacity-0 transition-all duration-150 group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 whitespace-nowrap shadow-lg">
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
