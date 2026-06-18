@@ -5,8 +5,12 @@ import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2,
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
+import { CreateProjectDialog } from "@/components/editor/create-project-dialog"
+import { RenameProjectDialog } from "@/components/editor/rename-project-dialog"
+import { DeleteProjectDialog } from "@/components/editor/delete-project-dialog"
 import { ShareDialog } from "@/components/editor/share-dialog"
 import { useShareDialog } from "@/hooks/use-share-dialog"
+import { useProjectActions } from "@/hooks/use-project-actions"
 import { CanvasWrapper } from "@/components/editor/canvas/canvas-wrapper"
 import type { ProjectSummary } from "@/lib/data/projects"
 
@@ -31,6 +35,7 @@ export function EditorWorkspaceClient({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isAISidebarOpen, setIsAISidebarOpen] = useState(false)
   const share = useShareDialog(project.id)
+  const actions = useProjectActions()
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-bg-base">
@@ -93,9 +98,9 @@ export function EditorWorkspaceClient({
         ownedProjects={ownedProjects}
         sharedProjects={sharedProjects}
         activeProjectId={project.id}
-        onCreateProject={() => {}}
-        onRenameProject={() => {}}
-        onDeleteProject={() => {}}
+        onCreateProject={actions.openCreate}
+        onRenameProject={actions.openRename}
+        onDeleteProject={actions.openDelete}
       />
 
       <main
@@ -128,6 +133,39 @@ export function EditorWorkspaceClient({
         error={share.error}
         onRemove={share.remove}
         removingId={share.removingId}
+      />
+
+      <CreateProjectDialog
+        open={actions.mode === "create"}
+        name={actions.name}
+        slug={actions.roomId}
+        loading={actions.loading}
+        onNameChange={actions.setName}
+        onClose={actions.closeDialog}
+        onSubmit={actions.submitCreate}
+      />
+
+      <RenameProjectDialog
+        open={actions.mode === "rename"}
+        currentName={actions.targetProject?.name ?? ""}
+        name={actions.name}
+        slug={actions.name
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")}
+        loading={actions.loading}
+        onNameChange={actions.setName}
+        onClose={actions.closeDialog}
+        onSubmit={actions.submitRename}
+      />
+
+      <DeleteProjectDialog
+        open={actions.mode === "delete"}
+        projectName={actions.targetProject?.name ?? ""}
+        loading={actions.loading}
+        onClose={actions.closeDialog}
+        onSubmit={actions.submitDelete}
       />
     </div>
   )
