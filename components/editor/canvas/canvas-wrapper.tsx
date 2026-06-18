@@ -1,30 +1,19 @@
 "use client"
 
 import React from "react"
-import { LiveblocksProvider, RoomProvider, ClientSideSuspense } from "@liveblocks/react"
+import { ClientSideSuspense } from "@liveblocks/react"
 import { ReactFlowProvider } from "@xyflow/react"
 import { CanvasFlow } from "./canvas-flow"
 
-interface CanvasWrapperProps {
-  roomId: string
-}
-
-export function CanvasWrapper({ roomId }: CanvasWrapperProps) {
+export function CanvasWrapper() {
   return (
-    <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
-      <RoomProvider
-        id={roomId}
-        initialPresence={{ cursor: null, isThinking: false }}
-      >
-        <CanvasErrorBoundary>
-          <ClientSideSuspense fallback={<CanvasLoading />}>
-            <ReactFlowProvider>
-              <CanvasFlow />
-            </ReactFlowProvider>
-          </ClientSideSuspense>
-        </CanvasErrorBoundary>
-      </RoomProvider>
-    </LiveblocksProvider>
+    <CanvasErrorBoundary>
+      <ClientSideSuspense fallback={<CanvasLoading />}>
+        <ReactFlowProvider>
+          <CanvasFlow />
+        </ReactFlowProvider>
+      </ClientSideSuspense>
+    </CanvasErrorBoundary>
   )
 }
 

@@ -2,6 +2,7 @@
 
 import React from "react"
 import { RectangleHorizontal, Diamond, Circle, Pill, Cylinder, Hexagon } from "lucide-react"
+import { SHAPE_PALETTES } from "@/types/canvas"
 
 const SHAPES = [
   { name: "rectangle", icon: RectangleHorizontal, width: 120, height: 70, label: "Rectangle" },
@@ -19,6 +20,63 @@ export function ShapeToolbar() {
       JSON.stringify({ shape, width, height })
     )
     event.dataTransfer.effectAllowed = "move"
+
+    // Create a temporary ghost container for the drag preview
+    const ghost = document.createElement("div")
+    ghost.style.width = `${width}px`
+    ghost.style.height = `${height}px`
+    ghost.style.position = "fixed"
+    ghost.style.left = "-1000px"
+    ghost.style.top = "-1000px"
+    ghost.style.zIndex = "-1000"
+    ghost.style.pointerEvents = "none"
+
+    const palette = SHAPE_PALETTES[shape] || { bg: "rgba(24, 24, 28, 0.85)", border: "#3a3a42" }
+    const bgColor = palette.bg
+    const borderCol = palette.border
+
+    if (shape === "rectangle" || shape === "circle" || shape === "pill") {
+      ghost.style.backgroundColor = bgColor
+      ghost.style.border = `1.5px solid ${borderCol}66` // Subtle border at rest
+      ghost.style.boxSizing = "border-box"
+      if (shape === "rectangle") {
+        ghost.style.borderRadius = "8px"
+      } else if (shape === "circle" || shape === "pill") {
+        ghost.style.borderRadius = "9999px"
+      }
+    } else {
+      let svgContent = ""
+      if (shape === "diamond") {
+        svgContent = `
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+            <polygon points="50,2 98,50 50,98 2,50" fill="${bgColor}" stroke="${borderCol}66" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+          </svg>
+        `
+      } else if (shape === "hexagon") {
+        svgContent = `
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+            <polygon points="25,2 75,2 98,50 75,98 25,98 2,50" fill="${bgColor}" stroke="${borderCol}66" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+          </svg>
+        `
+      } else if (shape === "cylinder") {
+        svgContent = `
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+            <path d="M 2,12 L 2,88 A 48,10 0 0,0 98,88 L 98,12 Z" fill="${bgColor}" stroke="${borderCol}66" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+            <ellipse cx="50" cy="12" rx="48" ry="10" fill="${bgColor}" stroke="${borderCol}66" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+          </svg>
+        `
+      }
+      ghost.innerHTML = svgContent
+    }
+
+    document.body.appendChild(ghost)
+    event.dataTransfer.setDragImage(ghost, width / 2, height / 2)
+
+    setTimeout(() => {
+      if (document.body.contains(ghost)) {
+        document.body.removeChild(ghost)
+      }
+    }, 0)
   }
 
   return (
