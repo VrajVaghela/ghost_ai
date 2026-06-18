@@ -45,6 +45,8 @@ next-env.d.ts
 # AI agent tooling
 .agents/
 .claude/
+.gemini/
+.vscode/
 
 /app/generated/prisma
 
