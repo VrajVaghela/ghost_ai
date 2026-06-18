@@ -115,6 +115,25 @@ export function CanvasFlow() {
     return () => window.removeEventListener("open-starter-templates", handleOpen)
   }, [])
 
+  useEffect(() => {
+    const handleSpecStateRequest = (event: Event) => {
+      const detail = (event as CustomEvent<{ requestId?: string }>).detail
+      window.dispatchEvent(
+        new CustomEvent("canvas-spec-state-response", {
+          detail: {
+            requestId: detail?.requestId,
+            nodes,
+            edges,
+          },
+        })
+      )
+    }
+
+    window.addEventListener("canvas-spec-state-request", handleSpecStateRequest)
+    return () =>
+      window.removeEventListener("canvas-spec-state-request", handleSpecStateRequest)
+  }, [nodes, edges])
+
   const handleImportTemplate = useCallback(
     (template: CanvasTemplate) => {
       reactFlow.setNodes(template.nodes)
