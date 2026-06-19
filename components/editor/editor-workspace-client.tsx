@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Share2, LayoutGrid, Save, Loader2, Check, AlertCircle } from "lucide-react"
+import { PanelLeftClose, PanelLeftOpen, Sparkles, Share2, LayoutGrid, Save, Loader2, Check, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
@@ -10,6 +10,7 @@ import { CreateProjectDialog } from "@/components/editor/create-project-dialog"
 import { RenameProjectDialog } from "@/components/editor/rename-project-dialog"
 import { DeleteProjectDialog } from "@/components/editor/delete-project-dialog"
 import { ShareDialog } from "@/components/editor/share-dialog"
+import { ThemeToggle } from "@/components/theme/theme-toggle"
 import { useShareDialog } from "@/hooks/use-share-dialog"
 import { useProjectActions } from "@/hooks/use-project-actions"
 import { LiveblocksProvider, RoomProvider } from "@liveblocks/react"
@@ -85,19 +86,20 @@ export function EditorWorkspaceClient({
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button
             variant="outline"
             size="sm"
             className={cn(
               "gap-2 min-w-[80px] transition-all duration-300",
-              saveStatus === "saved" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300",
+              saveStatus === "saved" && "border-state-success/30 bg-state-success/10 text-state-success hover:bg-state-success/20",
               saveStatus === "error" && "border-destructive/30 bg-destructive/10 text-destructive-foreground hover:bg-destructive/20"
             )}
             onClick={handleSave}
             disabled={saveStatus === "saving"}
           >
-            {saveStatus === "saving" && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
-            {saveStatus === "saved" && <Check className="h-4 w-4 text-emerald-400" />}
+            {saveStatus === "saving" && <Loader2 className="h-4 w-4 animate-spin text-text-muted" />}
+            {saveStatus === "saved" && <Check className="h-4 w-4 text-state-success" />}
             {saveStatus === "error" && <AlertCircle className="h-4 w-4 text-destructive" />}
             {saveStatus === "idle" && <Save className="h-4 w-4 text-text-muted" />}
             <span>
@@ -127,15 +129,18 @@ export function EditorWorkspaceClient({
             Share
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
+            aria-pressed={isAISidebarOpen}
+            className={cn(
+              "gap-2 border-[#62C073]/30 bg-[#62C073]/10 text-[#62C073] transition-colors",
+              "hover:bg-[#62C073]/20 hover:text-[#62C073]",
+              isAISidebarOpen && "bg-[#62C073]/20"
+            )}
             onClick={() => setIsAISidebarOpen((prev) => !prev)}
           >
-            {isAISidebarOpen ? (
-              <PanelRightClose className="h-5 w-5" />
-            ) : (
-              <PanelRightOpen className="h-5 w-5" />
-            )}
+            <Sparkles className="h-4 w-4" />
+            Ask AI
           </Button>
         </div>
       </header>
@@ -151,14 +156,7 @@ export function EditorWorkspaceClient({
         onDeleteProject={actions.openDelete}
       />
 
-      <main
-        className={cn(
-          "flex flex-1 bg-[#0d0d0d] pt-12",
-          "transition-all duration-300",
-          isSidebarOpen && "ml-72",
-          isAISidebarOpen && "mr-80"
-        )}
-      >
+      <main className="flex flex-1 bg-bg-base pt-12">
         <CanvasWrapper />
       </main>
 

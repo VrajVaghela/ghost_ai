@@ -544,7 +544,7 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
           {/* Sticky action header */}
           <div className="border-b border-surface-border bg-surface/30 p-3">
             <Button
-              className="w-full gap-2 bg-accent font-medium text-white hover:bg-accent/80"
+              className="w-full gap-2 bg-accent font-medium text-accent-foreground hover:bg-accent/80"
               onClick={handleGenerateSpec}
               disabled={isSpecGenerating}
             >
@@ -698,7 +698,7 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
               </Button>
               <Button
                 size="sm"
-                className="gap-2 bg-accent hover:bg-accent/80 text-white"
+                className="gap-2 bg-accent hover:bg-accent/80 text-accent-foreground"
                 onClick={() => handleSpecDownload(selectedSpec)}
               >
                 <Download className="h-4 w-4" />

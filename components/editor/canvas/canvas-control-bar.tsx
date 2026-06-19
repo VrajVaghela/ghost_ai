@@ -29,7 +29,7 @@ export function CanvasControlBar({
 
   return (
     <div
-      className="absolute bottom-24 left-6 z-50 flex items-center gap-1 rounded-full border border-border-default/80 bg-bg-elevated/90 p-1.5 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-border-subtle/80 select-none nodrag nopan nowheel"
+      className="flex items-center gap-1 rounded-full border border-border-default/80 bg-bg-elevated/90 p-1.5 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-border-subtle/80 select-none nodrag nopan nowheel"
       onClick={handlePrevent}
       onPointerDown={handlePrevent}
       onMouseDown={handlePrevent}

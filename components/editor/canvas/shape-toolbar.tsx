@@ -80,7 +80,7 @@ export function ShapeToolbar() {
   }
 
   return (
-    <div className="absolute bottom-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1.5 rounded-full border border-border-default/80 bg-bg-elevated/90 px-4 py-2 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-border-subtle/80 select-none">
+    <div className="flex items-center gap-1.5 rounded-full border border-border-default/80 bg-bg-elevated/90 px-4 py-2 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-border-subtle/80 select-none">
       {SHAPES.map(({ name, icon: Icon, width, height, label }) => (
         <div
           key={name}

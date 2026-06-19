@@ -2,9 +2,13 @@
 
 ## Theme
 
-Dark only. No light mode. The visual language is a dark technical workspace — near-black backgrounds, layered surfaces, and vivid accent colors for interactive elements.
+Dark-first, with an opt-in light mode. The primary visual language is a dark technical workspace — near-black backgrounds, layered surfaces, and vivid accent colors for interactive elements. Light mode mirrors the same token structure with an inverted, low-contrast surface scale.
 
-All colors are defined as CSS custom properties in `globals.css` and mapped to Tailwind tokens via `@theme inline`. Components must use these tokens — no hardcoded hex values or raw Tailwind color classes like `zinc-*`.
+The active theme is controlled by a `data-theme` attribute (`"dark"` | `"light"`) on the `<html>` element. Dark is the default. The `ThemeProvider` (`components/theme/theme-provider.tsx`) manages and persists the choice to `localStorage`, and a no-flash inline script in `app/layout.tsx` applies it before first paint. The navbar exposes a `ThemeToggle` button (`components/theme/theme-toggle.tsx`). Clerk's appearance follows the active theme via `components/providers.tsx`.
+
+All colors are defined as CSS custom properties in `globals.css` and mapped to Tailwind tokens via `@theme inline`. The dark palette lives in `:root`; light mode overrides only the raw palette variables under `[data-theme="light"]`, so all Tailwind tokens and shadcn aliases re-theme automatically. Components must use these tokens — no hardcoded hex values or raw Tailwind color classes like `zinc-*` — so they work in both themes. (Canvas `NODE_COLORS` are deliberate per-node content styling and remain fixed across themes.)
+
+The dark palette:
 
 | Role             | CSS Variable           | Hex / Value               |
 | ---------------- | ---------------------- | ------------------------- |
@@ -25,6 +29,27 @@ All colors are defined as CSS custom properties in `globals.css` and mapped to T
 | Error            | `--state-error`        | `#ff4d4f`                 |
 | Success          | `--state-success`      | `#34d399`                 |
 | Warning          | `--state-warning`      | `#fbbf24`                 |
+
+The light palette (`[data-theme="light"]`) overrides the same variables:
+
+| Role             | CSS Variable           | Hex / Value                |
+| ---------------- | ---------------------- | -------------------------- |
+| Page background  | `--bg-base`            | `#f7f7f8`                  |
+| Surface          | `--bg-surface`         | `#ffffff`                  |
+| Elevated surface | `--bg-elevated`        | `#f0f0f2`                  |
+| Subtle surface   | `--bg-subtle`          | `#e7e7ec`                  |
+| Default border   | `--border-default`     | `#d9d9e0`                  |
+| Subtle border    | `--border-subtle`      | `#c5c5cf`                  |
+| Primary text     | `--text-primary`       | `#16161a`                  |
+| Secondary text   | `--text-secondary`     | `#3a3a44`                  |
+| Muted text       | `--text-muted`         | `#6a6a76`                  |
+| Faint text       | `--text-faint`         | `#9a9aa6`                  |
+| Brand accent     | `--accent-primary`     | `#0b8f99` (deepened cyan)  |
+| Brand dim        | `--accent-primary-dim` | `rgba(11, 143, 153, 0.12)` |
+| AI accent / text | `--accent-ai(-text)`   | `#5a4fd6`                  |
+| Error            | `--state-error`        | `#e5484d`                  |
+| Success          | `--state-success`      | `#2f9e6f`                  |
+| Warning          | `--state-warning`      | `#b97e04`                  |
 
 Tailwind utility names map to these variables. Use `bg-base`, `bg-surface`, `text-copy-primary`, `text-copy-muted`, `border-surface-border`, `text-brand`, `bg-accent-dim`, etc.
 

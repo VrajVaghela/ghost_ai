@@ -4,6 +4,8 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
+- Light Mode Theming — Complete
+
 - Feature 29: Spec UI Integration - Complete
 
 - Feature 28: Spec Persistence & Download — Complete
@@ -27,6 +29,14 @@ Update this file whenever the current phase, active feature, or implementation s
 - Spec UI integration is complete. The AI sidebar Specs tab now lists, previews, and downloads generated specs.
 
 ## Completed
+
+- `light-mode-theming`: Added an opt-in light theme alongside the dark-first default.
+  - Added a light palette in [app/globals.css](file:///E:/vraj/Projects/aisysdesign/ghost-ai/app/globals.css) under `[data-theme="light"]`, overriding only raw palette variables so all `@theme inline` Tailwind tokens and shadcn aliases re-theme automatically. Added `color-scheme` and a light React Flow minimap-mask override.
+  - Added [components/theme/theme-provider.tsx](file:///E:/vraj/Projects/aisysdesign/ghost-ai/components/theme/theme-provider.tsx) (client context managing `data-theme` on `<html>`, persisted to `localStorage`) and [components/theme/theme-toggle.tsx](file:///E:/vraj/Projects/aisysdesign/ghost-ai/components/theme/theme-toggle.tsx) (Sun/Moon navbar button).
+  - Moved Clerk into [components/providers.tsx](file:///E:/vraj/Projects/aisysdesign/ghost-ai/components/providers.tsx) so `ClerkProvider` appearance follows the active theme; [app/layout.tsx](file:///E:/vraj/Projects/aisysdesign/ghost-ai/app/layout.tsx) now renders `<Providers>` plus a no-flash inline theme script and `suppressHydrationWarning`.
+  - Added the toggle to [components/editor/editor-navbar.tsx](file:///E:/vraj/Projects/aisysdesign/ghost-ai/components/editor/editor-navbar.tsx) (shared by editor home and workspace).
+  - Updated [context/ui-context.md](file:///E:/vraj/Projects/aisysdesign/ghost-ai/context/ui-context.md) Theme section from "Dark only" to dark-first + light, with both palette tables.
+  - `npx tsc --noEmit` passes.
 
 - `29-spec-ui-integration`: Wired generated specs into the existing AI sidebar Specs tab.
   - Replaced the static demo spec card in [components/editor/ai-sidebar.tsx](file:///E:/vraj/Projects/aisysdesign/ghost-ai/components/editor/ai-sidebar.tsx) with a compact scrollable ProjectSpec list for the current project.

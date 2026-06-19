@@ -27,7 +27,7 @@ function ColorSwatch({
       className={cn(
         "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-150 hover:scale-110 cursor-pointer relative outline-none border border-transparent",
         isActive
-          ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-[#111114] scale-110"
+          ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-bg-elevated scale-110"
           : ""
       )}
       style={{

@@ -26,7 +26,7 @@ export function PresenceAvatars() {
   return (
     <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
       {collaborators.length > 0 ? (
-        <div className="flex items-center gap-2 rounded-full bg-[#111114]/85 backdrop-blur-md border border-border-default p-1.5 pr-2.5 shadow-lg">
+        <div className="flex items-center gap-2 rounded-full bg-bg-surface/85 backdrop-blur-md border border-border-default p-1.5 pr-2.5 shadow-lg">
           <div className="flex -space-x-1.5">
             {visibleCollaborators.map((other) => {
               const name = other.info?.name || "Collaborator"
@@ -36,7 +36,7 @@ export function PresenceAvatars() {
               return (
                 <div
                   key={other.connectionId}
-                  className="relative flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full ring-2 ring-[#0d0d0d] bg-bg-surface text-xs font-semibold text-text-primary"
+                  className="relative flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full ring-2 ring-bg-base bg-bg-surface text-xs font-semibold text-text-primary"
                   title={name}
                 >
                   {avatar ? (
@@ -60,7 +60,7 @@ export function PresenceAvatars() {
               )
             })}
             {overflowCount > 0 && (
-              <div className="relative flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full ring-2 ring-[#0d0d0d] bg-bg-elevated border border-border-default text-xs font-semibold text-text-muted">
+              <div className="relative flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full ring-2 ring-bg-base bg-bg-elevated border border-border-default text-xs font-semibold text-text-muted">
                 +{overflowCount}
               </div>
             )}

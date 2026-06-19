@@ -4,6 +4,7 @@ import { UserButton } from "@clerk/nextjs"
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme/theme-toggle"
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean
@@ -23,7 +24,8 @@ export function EditorNavbar({ isSidebarOpen, onSidebarToggle }: EditorNavbarPro
         </Button>
       </div>
       <div className="flex-1" />
-      <div className="flex items-center">
+      <div className="flex items-center gap-1">
+        <ThemeToggle />
         <UserButton />
       </div>
     </header>

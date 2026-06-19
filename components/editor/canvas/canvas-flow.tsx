@@ -275,28 +275,32 @@ export function CanvasFlow() {
         fitView
       >
         <MiniMap
-          nodeColor="#18181c"
-          nodeStrokeColor="#3a3a42"
-          maskColor="rgba(8,8,9,0.7)"
-          style={{ backgroundColor: "#111114", border: "1px solid #2a2a30" }}
+          nodeColor="var(--bg-elevated)"
+          nodeStrokeColor="var(--border-subtle)"
+          maskColor="var(--xy-minimap-mask-background-color-default)"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border-default)",
+          }}
         />
-        <Background variant={BackgroundVariant.Dots} color="#2a2a30" gap={20} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
         <CollaboratorCursors />
       </ReactFlow>
 
-      {/* Floating pill-shaped toolbar */}
-      <ShapeToolbar />
+      {/* Floating bottom toolbar: shape panel + zoom/history controls side by side */}
+      <div className="absolute bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3">
+        <ShapeToolbar />
 
-      {/* Canvas Control Bar */}
-      <CanvasControlBar
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFitView={handleFitView}
-        onUndo={undo}
-        onRedo={redo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-      />
+        <CanvasControlBar
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onFitView={handleFitView}
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
+      </div>
 
       {/* Presence Avatars overlay */}
       <PresenceAvatars />

@@ -104,6 +104,36 @@
   --input: var(--bg-elevated);
   --ring: var(--accent-primary);
   --radius: 0.75rem;
+
+  color-scheme: dark;
+}
+
+/* ── Light theme palette ──
+   Activated via `data-theme="light"` on <html>. Only the raw palette variables
+   are overridden; every Tailwind token and shadcn semantic alias resolves
+   through these via `var()`, so they re-theme automatically. */
+[data-theme="light"] {
+  --bg-base: #f7f7f8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f0f0f2;
+  --bg-subtle: #e7e7ec;
+  --border-default: #d9d9e0;
+  --border-subtle: #c5c5cf;
+  --text-primary: #16161a;
+  --text-secondary: #3a3a44;
+  --text-muted: #6a6a76;
+  --text-faint: #9a9aa6;
+  --accent-primary: #0b8f99;
+  --accent-primary-dim: rgba(11, 143, 153, 0.12);
+  --accent-ai: #5a4fd6;
+  --accent-ai-text: #5a4fd6;
+  --state-error: #e5484d;
+  --state-success: #2f9e6f;
+  --state-warning: #b97e04;
+
+  --primary-foreground: #ffffff;
+
+  color-scheme: light;
 }
 
 /* ── React Flow dark-theme overrides ── */
@@ -126,6 +156,11 @@
   --xy-handle-border-color-default: var(--bg-base);
   --xy-selection-background-color-default: rgba(59, 130, 246, 0.05);
   --xy-selection-border-default: 1px dotted #3b82f6;
+}
+
+/* React Flow values that are hardcoded dark above and need a light counterpart. */
+[data-theme="light"] .react-flow {
+  --xy-minimap-mask-background-color-default: rgba(247, 247, 248, 0.7);
 }
 
 @layer base {
