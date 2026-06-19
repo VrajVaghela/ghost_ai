@@ -1,0 +1,9 @@
+.git
+node_modules
+.next
+.trigger
+.agents
+.claude
+.gemini
+.vscode
+context

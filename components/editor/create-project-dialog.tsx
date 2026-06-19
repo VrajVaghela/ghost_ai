@@ -51,6 +51,7 @@ export function CreateProjectDialog({
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               autoFocus
+              autoComplete="off"
             />
           </div>
           {name && (

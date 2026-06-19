@@ -1,5 +1,4 @@
 import { defineConfig } from "@trigger.dev/sdk";
-import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 
 export default defineConfig({
   project: process.env.TRIGGER_PROJECT_REF!, // Read from env variables (.env / .env.local)
@@ -16,12 +15,6 @@ export default defineConfig({
       randomize: true,         // Adds randomness to retry interval to prevent synchronized retries
     },
   },
-  build: {
-    extensions: [
-      prismaExtension({
-        mode: "engine-only",   // Required: Use engine-only mode because of custom schema client generator output path
-        version: "7.8.0",      // Matches Prisma version in package.json
-      }),
-    ],
-  },
+  // No prismaExtension needed — the project uses @prisma/adapter-pg (driver adapter),
+  // so the query engine runs as WASM, not as a native binary.
 });

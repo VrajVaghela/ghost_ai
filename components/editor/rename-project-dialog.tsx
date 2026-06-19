@@ -69,6 +69,7 @@ export function RenameProjectDialog({
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               onKeyDown={handleKeyDown}
+              autoComplete="off"
             />
           </div>
           {name && (
